@@ -3,11 +3,12 @@
 client_id = "6252477ecd027666b7a989a0e1d261ca"
 name = "Ad-Trade-Club"
 handle = "ad-trade-club"
-application_url = "https://example.com/"
+application_url = "https://were-inquiry-hours-passed.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-04"
@@ -22,10 +23,14 @@ api_version = "2025-04"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,write_pixels,read_customer_events"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [
+  "https://were-inquiry-hours-passed.trycloudflare.com/auth/callback",
+  "https://were-inquiry-hours-passed.trycloudflare.com/auth/shopify/callback",
+  "https://were-inquiry-hours-passed.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false

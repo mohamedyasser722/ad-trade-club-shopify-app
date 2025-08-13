@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "ed94be124c0a87f75b0397cf9776e88b"
+name = "ad-trade-club 2"
+handle = "ad-trade-club-2"
+application_url = "https://projectors-facility-layer-intensive.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customer_events,write_pixels"
+
+[auth]
+redirect_urls = [
+  "https://projectors-facility-layer-intensive.trycloudflare.com/auth/callback",
+  "https://projectors-facility-layer-intensive.trycloudflare.com/auth/shopify/callback",
+  "https://projectors-facility-layer-intensive.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false

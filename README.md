@@ -369,3 +369,71 @@ This template uses [Remix](https://remix.run). The following Shopify tools are a
 - [App extensions](https://shopify.dev/docs/apps/app-extensions/list)
 - [Shopify Functions](https://shopify.dev/docs/api/functions)
 - [Getting started with internationalizing your app](https://shopify.dev/docs/apps/best-practices/internationalization/getting-started)
+
+## Project-specific quick commands (cheatsheet)
+
+### Run locally (Admin app + tunnel + pixel draft)
+
+```bash
+npm run dev
+```
+
+### Switch dev store for testing
+
+```bash
+shopify app dev --store=<your-store>.myshopify.com --reset
+```
+
+- Example: `shopify app dev --store=calibtos.myshopify.com --reset`
+- Approve the install when prompted. The CLI updates URLs and installs the app on that store.
+
+### Database (Prisma + SQLite)
+
+- Apply schema/migrations (creates local DB if missing):
+
+```bash
+npx prisma migrate dev
+```
+
+- Open Prisma Studio (GUI):
+
+```bash
+npx prisma studio
+```
+
+- SQLite file path: `dev.sqlite` (project root). Open with DB Browser for SQLite/TablePlus if you prefer a GUI.
+
+- SQLite CLI (optional):
+
+```bash
+sqlite3 dev.sqlite
+.tables
+SELECT * FROM Shop;
+```
+
+### Deploy app configuration (updates remote, releases extensions)
+
+```bash
+npm run deploy
+```
+
+### Test the Web Pixel (POC)
+
+1) Ensure your external backend ingest endpoint is reachable over HTTPS (Cloudflare Tunnel or ngrok). Update the URL in `extensions/atc-web-pixel/src/index.js` if needed.
+2) Navigate to a storefront URL with UTM params appended by your redirect (or manually for testing):
+
+```
+?utm_source=atc&utm_campaign=<adSpaceId>:<slotNumber>
+```
+
+3) The pixel will:
+- On `page_viewed`, read UTM, set cookie `atc_slot`, and POST to `/api/web-pixel/analytics` with `accountID`, `event_name`, `event_data`, and `campaign_id`.
+- On `product_added_to_cart` and `checkout_completed`, read `atc_slot` cookie and POST with the same shape.
+
+### Where things live
+
+- Admin UI and server routes: `app/routes/*`
+- Shopify auth/session + Admin API: `app/shopify.server.js`
+- Prisma client and schema: `app/db.server.js`, `prisma/schema.prisma`
+- Web Pixel code: `extensions/atc-web-pixel/src/index.js`
+- Web Pixel settings/consent: `extensions/atc-web-pixel/shopify.extension.toml`

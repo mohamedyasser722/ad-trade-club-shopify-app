@@ -30,3 +30,9 @@ model Session {
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
 }
+
+model Shop {
+  id      String @id @default(cuid())
+  domain  String @unique
+  pixelId String?
+}
