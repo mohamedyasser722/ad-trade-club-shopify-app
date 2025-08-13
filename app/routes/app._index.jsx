@@ -17,7 +17,7 @@ export const loader = async ({ request }) => {
   }
 
   // 2. Create pixel
-  
+
   const mutationResponse = await admin.graphql(
     `#graphql\n      mutation webPixelCreate($webPixel: WebPixelInput!) {\n        webPixelCreate(webPixel: $webPixel) {\n          userErrors {\n            field\n            message\n          }\n          webPixel {\n            settings\n            id\n          }\n        }\n      }\n    `,
     {
