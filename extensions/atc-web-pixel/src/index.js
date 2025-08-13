@@ -15,7 +15,7 @@ register(({ analytics, browser, settings }) => {
   const shop = settings.accountID; // e.g. calibtos.myshopify.com
 
   const ingest = (body) => {
-    fetch("https://inch-thomson-myanmar-efficient.trycloudflare.com/api/web-pixel/analytics", {
+    fetch("https://inch-thomson-myanmar-efficient.trycloudflare.com/api/web-pixel/analytics", { // cloudflare proxy to use https
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
