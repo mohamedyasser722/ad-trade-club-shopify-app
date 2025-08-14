@@ -3,7 +3,7 @@
 client_id = "ed94be124c0a87f75b0397cf9776e88b"
 name = "ad-trade-club 2"
 handle = "ad-trade-club-2"
-application_url = "https://projectors-facility-layer-intensive.trycloudflare.com"
+application_url = "https://imagination-pipe-meter-although.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "read_customer_events,write_pixels"
 
 [auth]
 redirect_urls = [
-  "https://projectors-facility-layer-intensive.trycloudflare.com/auth/callback",
-  "https://projectors-facility-layer-intensive.trycloudflare.com/auth/shopify/callback",
-  "https://projectors-facility-layer-intensive.trycloudflare.com/api/auth/callback"
+  "https://imagination-pipe-meter-although.trycloudflare.com/auth/callback",
+  "https://imagination-pipe-meter-although.trycloudflare.com/auth/shopify/callback",
+  "https://imagination-pipe-meter-although.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
