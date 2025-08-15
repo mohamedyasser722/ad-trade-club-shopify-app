@@ -1,21 +1,45 @@
 import {register} from "@shopify/web-pixels-extension";
 
 // Cookie helpers using the sandbox browser API
-async function setAtcCookie(browser, value) {
+async function setAtcCookie(browser, value, sig) {
   // 30 days ~ 2,592,000 seconds
   const maxAge = 30 * 24 * 60 * 60;
   await browser.cookie.set(`atc_slot=${encodeURIComponent(value)}; Path=/; SameSite=Lax; Max-Age=${maxAge}`);
+  if (sig) {
+    await browser.cookie.set(`atc_sig=${encodeURIComponent(sig)}; Path=/; SameSite=Lax; Max-Age=${maxAge}`);
+  }
 }
 async function getAtcCookie(browser) {
   const v = await browser.cookie.get('atc_slot');
   return decodeURIComponent(v || '');
+}
+async function getSigCookie(browser) {
+  const v = await browser.cookie.get('atc_sig');
+  return decodeURIComponent(v || '');
+}
+
+function parseAtcFromUrl(href) {
+  try {
+    const u = new URL(href);
+    // Prefer query ?atc=... ; fall back to hash #atc=...
+    let atc = u.searchParams.get('atc');
+    let sig = u.searchParams.get('atc_sig');
+    if (!atc && u.hash) {
+      const hash = new URLSearchParams(u.hash.replace(/^#/, ''));
+      atc = hash.get('atc') || atc;
+      sig = hash.get('atc_sig') || sig;
+    }
+    return { atc, sig };
+  } catch {
+    return { atc: null, sig: null };
+  }
 }
 
 register(({ analytics, browser, settings }) => {
   const shop = settings.accountID; // e.g. calibtos.myshopify.com
 
   const ingest = (body) => {
-    fetch("https://inch-thomson-myanmar-efficient.trycloudflare.com/api/web-pixel/analytics", { // cloudflare proxy to use https
+    fetch("https://technology-outcome-dont-fathers.trycloudflare.com/api/web-pixel/analytics", { // cloudflare proxy to use https
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -24,46 +48,38 @@ register(({ analytics, browser, settings }) => {
   };
 
   analytics.subscribe('page_viewed', async (event) => {
-    const href = event?.context?.document?.location?.href;
-    let campaign = null;
-    try {
-      const u = new URL(href);
-      const src = u.searchParams.get('utm_source');
-      const camp = u.searchParams.get('utm_campaign');
-      if (src === 'atc' && camp) {
-        campaign = camp;
-        await setAtcCookie(browser, campaign);
-      }
-    } catch {}
+    const href = event?.context?.document?.location?.href || '';
+    const { atc, sig } = parseAtcFromUrl(href);
 
-    const campaignId = campaign || (await getAtcCookie(browser));
+    if (atc) {
+      await setAtcCookie(browser, atc, sig);
+    }
+
+    const campaignId = atc || (await getAtcCookie(browser));
+    const campaignSig = sig || (await getSigCookie(browser)) || null;
 
     ingest({
       accountID: shop,
       event_name: 'page_viewed',
       event_data: event,
-      campaign_id: campaignId,
+      campaign_id: campaignId || null,
+      campaign_sig: campaignSig,
     });
   });
 
-  analytics.subscribe('product_added_to_cart', async (event) => {
+  const forward = async (name, evt) => {
     const campaignId = await getAtcCookie(browser);
+    const campaignSig = await getSigCookie(browser);
     ingest({
       accountID: shop,
-      event_name: 'product_added_to_cart',
-      event_data: event,
-      campaign_id: campaignId,
+      event_name: name,
+      event_data: evt,
+      campaign_id: campaignId || null,
+      campaign_sig: campaignSig || null,
     });
-  });
+  };
 
-  analytics.subscribe('checkout_completed', async (event) => {
-    const campaignId = await getAtcCookie(browser);
-    ingest({
-      accountID: shop,
-      event_name: 'checkout_completed',
-      event_data: event,
-      campaign_id: campaignId,
-    });
-  });
+  analytics.subscribe('product_added_to_cart',  (e) => forward('product_added_to_cart', e));
+  analytics.subscribe('checkout_completed',      (e) => forward('checkout_completed', e));
+  analytics.subscribe('checkout_address_info_submitted', (e) => forward('checkout_address_info_submitted', e));
 });
-// https://calibtos-dev-store.myshopify.com/?utm_source=atc&utm_campaign=61616161-6161-4616-8616-616161616161:1
